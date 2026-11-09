@@ -1,0 +1,23 @@
+# Variables de entorno (se conserva la plantilla de ejemplo)
+.env
+.env.*
+!.env.example
+
+# Dependencias
+node_modules/
+venv/
+.venv/
+__pycache__/
+
+# Resultados y cachés
+dist/
+build/
+coverage/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Archivos del sistema y del editor
+.DS_Store
+Thumbs.db
+.vscode/
