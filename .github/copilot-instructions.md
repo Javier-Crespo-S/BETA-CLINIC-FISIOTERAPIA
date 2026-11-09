@@ -4,6 +4,10 @@ Este archivo va en .github/copilot-instructions.md. Léelo entero antes de propo
 
 1. Contexto del proyecto
 
+## Propósito del proyecto
+
+Demostración técnica de portfolio. Todos los datos son ficticios y la aplicación no está destinada a uso clínico real. Prioriza código claro, mantenible y bien documentado, y explica brevemente las decisiones de diseño relevantes.
+
 Aplicación web full-stack para una clínica de fisioterapia. Empieza con un solo profesional, pero el diseño debe permitir añadir más profesionales en el futuro sin rehacer el modelo de datos.
 
 Funcionalidades previstas (todo el proyecto):
