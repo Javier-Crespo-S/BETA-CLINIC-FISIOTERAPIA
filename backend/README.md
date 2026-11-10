@@ -25,18 +25,23 @@ Si PowerShell no permite activar el entorno, se puede invocar directamente
 
 ## Configurar y arrancar
 
-`.env.example` documenta las variables necesarias, pero no se carga
-automáticamente. En PowerShell, establece la URL para la sesión actual antes de
-arrancar la aplicación:
+La aplicación carga automáticamente `backend\.env` al arrancar. Para crear el
+archivo local a partir de la plantilla, desde la carpeta `backend`:
 
 ```powershell
-$env:DATABASE_URL = "postgresql+psycopg://USUARIO:CONTRASENA@localhost:5432/beta_clinic_dev"
-python run.py
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
 ```
 
-Sustituye `USUARIO` y `CONTRASENA` por las credenciales locales de PostgreSQL.
-Si la contraseña contiene caracteres especiales de URL, deben codificarse.
-No guardes credenciales reales en el repositorio.
+Edita `.env` en tu equipo para configurar la variable `DATABASE_URL`. El archivo
+`.env` está excluido del control de versiones; no compartas ni subas sus valores.
+Una variable `DATABASE_URL` definida previamente en el entorno tiene prioridad
+sobre la del archivo.
+
+Arranca la aplicación desde la carpeta `backend`:
+
+```powershell
+python run.py
+```
 
 ## Comprobar la API y PostgreSQL
 
