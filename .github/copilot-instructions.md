@@ -49,24 +49,26 @@ Todo en español: comentarios, mensajes de commit, documentación, textos de la 
 
 4. Tecnologías
 
-Decididas:
+**Decididas:**
 
-Capa	Tecnología
-Frontend	React con JavaScript (sin TypeScript)
-Backend	Python con Flask
-Base de datos	PostgreSQL
-Autenticación	Servicio gestionado externo (no implementar login desde cero)
-Organización	Monorepo: frontend y backend separados en un mismo repositorio
+| Capa | Tecnología |
+|---|---|
+| Frontend | React con **JavaScript** (sin TypeScript), creado con **Vite** |
+| Backend | **Python con Flask** |
+| Base de datos | **PostgreSQL**, accedida con **SQLAlchemy** (a través de **Flask-SQLAlchemy**), controlador **Psycopg 3** y migraciones con **Flask-Migrate** |
+| Dependencias de Python | Entorno virtual **`venv`** con **`pip`** y `requirements.txt` |
+| Autenticación | **Servicio gestionado externo** (no implementar login desde cero) |
+| Organización | **Monorepo**: frontend y backend separados en un mismo repositorio |
 
-Pendientes de decidir (no las elijas tú; consúltame antes):
+**Pendientes de decidir** (no las elijas tú; consúltame antes):
 
-Extensiones y librerías de Flask: acceso a base de datos (ORM), migraciones, validación de datos y verificación de los tokens del servicio de autenticación.
-Herramienta de arranque y construcción del frontend, y librería de estilos.
-Proveedor concreto de autenticación gestionada.
-Hosting (debe estar en la UE) y base de datos gestionada.
-Servicio de envío de emails y de SMS o WhatsApp.
-Pasarela de pago (por ejemplo Stripe o Redsys), para la fase 4.
-Herramientas de testing.
+- Librería de validación de datos en Flask y verificación de los tokens del servicio de autenticación.
+- Librería de estilos del frontend.
+- Proveedor concreto de autenticación gestionada.
+- Hosting (debe estar en la **UE**) y base de datos gestionada.
+- Servicio de envío de emails y de SMS o WhatsApp.
+- Pasarela de pago (por ejemplo Stripe o Redsys), para la fase 4.
+- Herramientas de testing.
 
 
 5. Estructura del repositorio
