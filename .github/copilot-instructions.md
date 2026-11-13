@@ -55,20 +55,20 @@ Todo en español: comentarios, mensajes de commit, documentación, textos de la 
 |---|---|
 | Frontend | React con **JavaScript** (sin TypeScript), creado con **Vite** |
 | Backend | **Python con Flask** |
-| Base de datos | **PostgreSQL**, accedida con **SQLAlchemy** (a través de **Flask-SQLAlchemy**), controlador **Psycopg 3** y migraciones con **Flask-Migrate** |
+| Base de datos | **PostgreSQL**, con **SQLAlchemy** (vía **Flask-SQLAlchemy**), controlador **Psycopg 3** y migraciones con **Flask-Migrate** |
+| Configuración | Variables de entorno desde `backend/.env` con **python-dotenv** |
 | Dependencias de Python | Entorno virtual **`venv`** con **`pip`** y `requirements.txt` |
-| Autenticación | **Servicio gestionado externo** (no implementar login desde cero) |
+| Tests | **pytest**, con una base de datos PostgreSQL de pruebas aparte |
+| Autenticación | **Clerk** (servicio gestionado; no implementar login desde cero) |
+| Hosting | **Vercel** (frontend), **Render** (backend) y **Neon** (PostgreSQL), en planes gratuitos |
 | Organización | **Monorepo**: frontend y backend separados en un mismo repositorio |
 
 **Pendientes de decidir** (no las elijas tú; consúltame antes):
 
-- Librería de validación de datos en Flask y verificación de los tokens del servicio de autenticación.
+- Librería de validación de datos en Flask y librería para verificar los tokens de Clerk.
 - Librería de estilos del frontend.
-- Proveedor concreto de autenticación gestionada.
-- Hosting (debe estar en la **UE**) y base de datos gestionada.
 - Servicio de envío de emails y de SMS o WhatsApp.
-- Pasarela de pago (por ejemplo Stripe o Redsys), para la fase 4.
-- Herramientas de testing.
+- Pasarela de pago (por ejemplo Stripe o Redsys), para una fase posterior.
 
 
 5. Estructura del repositorio
@@ -113,6 +113,16 @@ Zona horaria: guarda las fechas con zona horaria (UTC) y muéstralas en hora de 
 Reserva temporal del hueco mientras el usuario completa el formulario, con caducidad.
 Cancelar y reprogramar con reglas de antelación configurables.
 El modelo de datos debe permitir varios profesionales, cada uno con su agenda, aunque al principio haya uno solo.
+
+**Reglas de negocio actuales de la agenda (fase 1, solo presencial):**
+
+- Tipos de sesión: **valoración inicial** (60 min) y **seguimiento** (30 min).
+- Franjas de 30 minutos: las citas empiezan en punto o y media y duran un múltiplo de 30.
+- El paciente elige el tipo al reservar, y eso determina el tamaño del hueco.
+- Reservas con al menos 12 horas de antelación y hasta 60 días vista. Cancelación hasta 24 horas antes.
+- La reserva temporal del hueco, los créditos y las videollamadas **no están en el alcance actual**.
+- Las **videollamadas** (más adelante) solo las agendará el profesional, en huecos de 30 minutos y asociadas a un plan temporal del paciente. Compartirán la misma agenda y el mismo control de solapamientos.
+- No se guarda el motivo de consulta en la reserva (minimización de datos).
 
 
 8. Reserva sin registro

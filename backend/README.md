@@ -43,6 +43,38 @@ Arranca la aplicación desde la carpeta `backend`:
 python run.py
 ```
 
+## Preparar el esquema y cargar datos ficticios
+
+Antes de cargar el profesional de prueba, crea o actualiza las tablas aplicando
+las migraciones desde la carpeta `backend`:
+
+```powershell
+python -m flask --app run db upgrade
+python -m scripts.cargar_datos_prueba
+```
+
+El script utiliza la base configurada para la aplicación y solo carga datos
+ficticios.
+
+## Ejecutar las pruebas
+
+Las pruebas exigen una base PostgreSQL aparte cuya URL se configura mediante
+`TEST_DATABASE_URL`. Su nombre debe terminar en `_test`; las pruebas abortan
+antes de conectarse si falta esa variable o el nombre no es válido. No utilizan
+`DATABASE_URL`. La base debe existir y permitir instalar la extensión
+`btree_gist`, necesaria para probar la migración.
+
+Desde PowerShell, con el entorno virtual activado, define la URL de tu base de
+pruebas y ejecuta:
+
+```powershell
+$env:TEST_DATABASE_URL = "postgresql+psycopg://usuario:contraseña@localhost/beta_clinic_test"
+python -m pytest
+```
+
+La suite aplica las migraciones a esa base antes de ejecutar los casos. No
+configures `TEST_DATABASE_URL` para apuntar a la base de desarrollo.
+
 ## Comprobar la API y PostgreSQL
 
 Con la aplicación arrancada, en otra sesión de PowerShell:
