@@ -419,3 +419,84 @@ def test_nuevo_paciente_se_crea_con_email_no_verificado(contexto_aplicacion):
     )
 
     assert paciente.email_verificado is False
+
+
+def test_indice_unico_de_email_normalizado_existe():
+    indices = {
+        indice["name"]: indice
+        for indice in inspect(db.engine).get_indexes("paciente")
+    }
+
+    assert "uq_paciente_email_lower" in indices
+    indice_email = indices["uq_paciente_email_lower"]
+    assert indice_email["unique"] is True
+    assert indice_email["column_names"] == [None]
+    expresion = indice_email["expressions"][0]
+    assert expresion.startswith("lower(email")
+
+
+def test_base_de_datos_rechaza_emails_que_difieren_en_mayusculas(
+    contexto_aplicacion,
+):
+    db.session.add(
+        Paciente(
+            nombre="Paciente original",
+            email="duplicado@example.invalid",
+            telefono="600000012",
+            email_verificado=False,
+        )
+    )
+    db.session.commit()
+    db.session.add(
+        Paciente(
+            nombre="Paciente duplicado",
+            email="DUPLICADO@example.invalid",
+            telefono="600000013",
+            email_verificado=False,
+        )
+    )
+
+    with pytest.raises(IntegrityError):
+        db.session.commit()
+    db.session.rollback()
+
+
+def test_creacion_concurrente_con_mismo_email_devuelve_un_paciente(
+    aplicacion,
+    contexto_aplicacion,
+):
+    barrera = Barrier(2)
+
+    def crear(nombre, telefono):
+        with aplicacion.app_context():
+            try:
+                barrera.wait(timeout=10)
+                paciente = obtener_o_crear_paciente(
+                    nombre,
+                    "carrera@example.invalid",
+                    telefono,
+                )
+                return paciente.id
+            finally:
+                db.session.remove()
+
+    with ThreadPoolExecutor(max_workers=2) as ejecutor:
+        ids_pacientes = list(
+            ejecutor.map(
+                lambda datos: crear(*datos),
+                (
+                    ("Paciente concurrente A", "600000014"),
+                    ("Paciente concurrente B", "600000015"),
+                ),
+            )
+        )
+
+    assert ids_pacientes[0] == ids_pacientes[1]
+    assert (
+        db.session.scalar(
+            select(db.func.count())
+            .select_from(Paciente)
+            .where(db.func.lower(Paciente.email) == "carrera@example.invalid")
+        )
+        == 1
+    )

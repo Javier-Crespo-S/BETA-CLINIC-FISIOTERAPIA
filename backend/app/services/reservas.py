@@ -18,6 +18,7 @@ _ZONA_MADRID = ZoneInfo("Europe/Madrid")
 _DURACION_CODIGO_BYTES = 32
 _LONGITUD_MAXIMA_CODIGO = 256
 _HASH_SOLAPAMIENTO = "ex_cita_profesional_horario_activo"
+_INDICE_EMAIL_UNICO = "uq_paciente_email_lower"
 _MENSAJE_HUECO_NO_DISPONIBLE = "El hueco ya no está disponible."
 _MENSAJE_CITA_NO_ENCONTRADA = "No se encontró una cita con ese código."
 
@@ -118,6 +119,22 @@ def _es_conflicto_de_solapamiento(error: IntegrityError) -> bool:
     )
 
 
+def _es_conflicto_de_email_unico(error: IntegrityError) -> bool:
+    error_postgres = error.orig
+    codigo_estado = getattr(error_postgres, "sqlstate", None) or getattr(
+        error_postgres, "pgcode", None
+    )
+    diagnostico = getattr(error_postgres, "diag", None)
+    nombre_restriccion = getattr(diagnostico, "constraint_name", None)
+    return codigo_estado == "23505" and nombre_restriccion == _INDICE_EMAIL_UNICO
+
+
+def _buscar_paciente_por_email(email: str) -> Paciente | None:
+    return db.session.scalar(
+        select(Paciente).where(func.lower(Paciente.email) == email)
+    )
+
+
 def obtener_o_crear_paciente(nombre: str, email: str, telefono: str) -> Paciente:
     if not all(isinstance(valor, str) for valor in (nombre, email, telefono)):
         raise DatosPacienteInvalidos("Completa los datos de contacto requeridos.")
@@ -135,9 +152,7 @@ def obtener_o_crear_paciente(nombre: str, email: str, telefono: str) -> Paciente
     ):
         raise DatosPacienteInvalidos("Completa los datos de contacto requeridos.")
 
-    paciente = db.session.scalar(
-        select(Paciente).where(func.lower(Paciente.email) == email)
-    )
+    paciente = _buscar_paciente_por_email(email)
     if paciente is not None:
         return paciente
 
@@ -148,7 +163,17 @@ def obtener_o_crear_paciente(nombre: str, email: str, telefono: str) -> Paciente
         email_verificado=False,
     )
     db.session.add(paciente)
-    db.session.commit()
+    try:
+        db.session.commit()
+    except IntegrityError as error:
+        db.session.rollback()
+        if not _es_conflicto_de_email_unico(error):
+            raise ErrorReserva("No se pudo guardar el paciente.") from error
+
+        paciente_existente = _buscar_paciente_por_email(email)
+        if paciente_existente is None:
+            raise ErrorReserva("No se pudo guardar el paciente.") from error
+        return paciente_existente
     return paciente
 
 
