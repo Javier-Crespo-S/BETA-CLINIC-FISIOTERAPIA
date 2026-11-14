@@ -2,12 +2,16 @@ import os
 from pathlib import Path
 
 import pytest
+from dotenv import load_dotenv
 from flask_migrate import upgrade
 from sqlalchemy import delete
 
 from app import create_app
 from app.extensiones import db
 from app.models import Bloqueo, Cita, DisponibilidadSemanal, Paciente, Profesional
+
+
+load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
 
 
 @pytest.fixture(scope="session")

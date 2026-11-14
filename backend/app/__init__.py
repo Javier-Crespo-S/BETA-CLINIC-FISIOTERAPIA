@@ -18,9 +18,12 @@ def _configuracion_de_pruebas() -> dict:
 
     try:
         url = make_url(url_pruebas)
+        from .config import Config
+
+        url_desarrollo = make_url(Config.SQLALCHEMY_DATABASE_URI)
     except (ArgumentError, ValueError) as error:
         raise RuntimeError(
-            "TEST_DATABASE_URL no es una URL de PostgreSQL válida."
+            "TEST_DATABASE_URL o DATABASE_URL no es una URL válida."
         ) from error
 
     if url.get_backend_name() != "postgresql":
@@ -29,8 +32,11 @@ def _configuracion_de_pruebas() -> dict:
     nombre_base = url.database or ""
     if not nombre_base.endswith("_test") or nombre_base == "beta_clinic_dev":
         raise RuntimeError(
-            "La base de pruebas debe terminar en «_test» y ser distinta "
-            "de la base de desarrollo."
+            "El nombre de la base de pruebas debe terminar en «_test»."
+        )
+    if nombre_base == url_desarrollo.database:
+        raise RuntimeError(
+            "TEST_DATABASE_URL debe apuntar a una base distinta de DATABASE_URL."
         )
 
     return {
@@ -42,12 +48,11 @@ def _configuracion_de_pruebas() -> dict:
 
 def create_app(pruebas: bool = False):
     aplicacion = Flask(__name__)
+    load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=False)
 
     if pruebas:
         aplicacion.config.update(_configuracion_de_pruebas())
     else:
-        load_dotenv(Path(__file__).resolve().parent.parent / ".env", override=False)
-
         from .config import Config
 
         aplicacion.config.from_object(Config)

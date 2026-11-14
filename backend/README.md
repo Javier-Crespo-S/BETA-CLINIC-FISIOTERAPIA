@@ -58,22 +58,37 @@ ficticios.
 
 ## Ejecutar las pruebas
 
-Las pruebas exigen una base PostgreSQL aparte cuya URL se configura mediante
-`TEST_DATABASE_URL`. Su nombre debe terminar en `_test`; las pruebas abortan
-antes de conectarse si falta esa variable o el nombre no es válido. No utilizan
-`DATABASE_URL`. La base debe existir y permitir instalar la extensión
+Las pruebas exigen una base PostgreSQL aparte configurada mediante
+`TEST_DATABASE_URL`. Puedes definirla en `backend/.env` (a partir de
+`.env.example`) o en la terminal. Si está definida en ambos sitios, prevalece
+la variable de entorno. La base debe existir y permitir instalar la extensión
 `btree_gist`, necesaria para probar la migración.
 
-Desde PowerShell, con el entorno virtual activado, define la URL de tu base de
-pruebas y ejecuta:
+Desde PowerShell, puedes guardar una URL ficticia de ejemplo en `.env` y editarla
+localmente:
 
 ```powershell
-$env:TEST_DATABASE_URL = "postgresql+psycopg://usuario:contraseña@localhost/beta_clinic_test"
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+```
+
+O definirla en el entorno de la terminal, que tendrá prioridad sobre `.env`:
+
+```powershell
+$env:TEST_DATABASE_URL = "postgresql+psycopg://usuario:clave@localhost:5432/beta_clinic_test"
+```
+
+En ambos casos, la URL debe apuntar a una base cuyo nombre termine en `_test`
+y sea distinta de la base de desarrollo configurada por `DATABASE_URL`. Si
+`TEST_DATABASE_URL` no está definida, las pruebas abortan; nunca se utiliza
+`DATABASE_URL` como sustituto. Con el entorno virtual activado, ejecuta:
+
+```powershell
 python -m pytest
 ```
 
-La suite aplica las migraciones a esa base antes de ejecutar los casos. No
-configures `TEST_DATABASE_URL` para apuntar a la base de desarrollo.
+La suite aplica las migraciones a la base indicada por `TEST_DATABASE_URL`
+antes de ejecutar los casos. No configures esa variable para apuntar a la base
+de desarrollo.
 
 ## Comprobar la API y PostgreSQL
 
